@@ -7,21 +7,31 @@ use App\Repository\AgenceRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=AgenceRepository::class)
  * @ApiResource(
  *  collectionOperations={
  *      "get"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') or is_granted('ROLE_CAISSIER')",
  *          "path"="coldcash/agences"
  *      },
  *      "post"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM')",
  *          "path"="coldcash/agences"
  *      }
  *  },
  *  itemOperations={
  *      "get"={
- *          "path"="coldcash/agences"
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') or (user.getAgence() == object) or is_granted('ROLE_CAISSIER')",
+ *          "path"="coldcash/agence/{id}",
+ *          "normalization_context"={"groups"={"agence:info"}}
+ *      },
+ *      "put"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') or is_granted('ROLE_CAISSIER')",
+ *          "path"="coldcash/agence/{id}",
+ *          "denormalization_context"={"groups"={"agence:newInfo"}}
  *      }
  *  }
  * )
@@ -32,21 +42,25 @@ class Agence
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"agence:info"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"agence:info", "agence:newInfo"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="text")
+     * @Groups({"agence:info", "agence:newInfo"})
      */
     private $adresse;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="float")
+     * @Groups({"agence:info"})
      */
     private $solde;
 
@@ -57,20 +71,26 @@ class Agence
 
     /**
      * @ORM\OneToMany(targetEntity=Agent::class, mappedBy="agence", orphanRemoval=true)
+     * @Groups({"agence:info"})
      */
     private $agents;
 
     /**
      * @ORM\OneToOne(targetEntity=AdminAgence::class, inversedBy="agence", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(nullable=true)
      */
     private $admin;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Depot::class, mappedBy="agence")
+     */
+    private $depots;
 
     public function __construct()
     {
         $this->agents = new ArrayCollection();
         $this->statut = true;
         $this->solde = 700000;
+        $this->depots = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -109,7 +129,7 @@ class Agence
 
     public function setSolde(int $solde): self
     {
-        $this->solde = $solde;
+        $this->solde += $solde;
 
         return $this;
     }
@@ -161,9 +181,39 @@ class Agence
         return $this->admin;
     }
 
-    public function setAdmin(AdminAgence $admin): self
+    public function setAdmin(?AdminAgence $admin): self
     {
         $this->admin = $admin;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Depot[]
+     */
+    public function getDepots(): Collection
+    {
+        return $this->depots;
+    }
+
+    public function addDepot(Depot $depot): self
+    {
+        if (!$this->depots->contains($depot)) {
+            $this->depots[] = $depot;
+            $depot->setAgence($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDepot(Depot $depot): self
+    {
+        if ($this->depots->removeElement($depot)) {
+            // set the owning side to null (unless already changed)
+            if ($depot->getAgence() === $this) {
+                $depot->setAgence(null);
+            }
+        }
 
         return $this;
     }

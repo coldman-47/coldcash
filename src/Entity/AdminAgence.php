@@ -15,19 +15,29 @@ use Symfony\Component\Validator\Constraints\NotNull;
  * @ApiResource(
  *  attributes = {
  *      "pagination_items_per_page"=10,  
- *      "security" = "is_granted('ROLE_ADMINSYSTEM')"
  *  },
  *  collectionOperations={
  *      "get"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM')",
  *          "path"="agence/admins"
  *      },
  *      "post"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM')",
  *          "path"="agence/admins",
  *          "denormalization_context"={"groups"={"adminAgence"}}
  *      }
  *  },
  *  itemOperations={
  *      "get"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') or user.getId() == object.getId()",
+ *          "path"="agence/admin/{id}"
+ *      },
+ *      "put"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') or user.getId() == object.getId()",
+ *          "path"="agence/admin/{id}"
+ *      },
+ *      "delete"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM')",
  *          "path"="agence/admin/{id}"
  *      }
  *  }
@@ -36,21 +46,29 @@ use Symfony\Component\Validator\Constraints\NotNull;
 class AdminAgence extends User
 {
     /**
-     * @ORM\JoinColumn(nullable=false)
-     * @Groups({"adminAgence"})
-     * @Assert\NotNull
+     * @ORM\OneToOne(targetEntity=Agence::class, mappedBy="admin", cascade={"persist", "remove"})
      */
     private $agence;
+
+    public function __construct()
+    {
+        $this->roles[] = 'ROLE_AGENT';
+    }
 
     public function getAgence(): ?Agence
     {
         return $this->agence;
     }
 
-    public function setAgence(Agence $agence): self
+    public function setAgence(?Agence $agence): self
     {
+        // unset the owning side of the relation if necessary
+        if ($agence === null && $this->agence !== null) {
+            $this->agence->setAdmin(null);
+        }
+
         // set the owning side of the relation if necessary
-        if ($agence->getAdmin() !== $this) {
+        if ($agence !== null && $agence->getAdmin() !== $this) {
             $agence->setAdmin($this);
         }
 

@@ -35,35 +35,35 @@ class User implements UserInterface
      * @ORM\Column(type="integer")
      * @Groups("adminAgence")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Groups("adminAgence")
      */
-    private $username;
+    protected $username;
 
-    private $roles = [];
+    protected $roles = [];
 
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
      * @Groups("adminAgence")
      */
-    private $password;
+    protected $password;
 
     /**
      * @ORM\ManyToOne(targetEntity=Profil::class, inversedBy="users")
      * @ORM\JoinColumn(nullable=false)
      * @Groups("adminAgence")
      */
-    private $profil;
+    protected $profil;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups("adminAgence")
      */
-    private $nom;
+    protected $nom;
 
     public function getId(): ?int
     {

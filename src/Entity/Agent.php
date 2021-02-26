@@ -26,15 +26,15 @@ use Doctrine\Common\Collections\ArrayCollection;
  *  },
  *  itemOperations={
  *      "get"={
- *          "security" = "is_granted('ROLE_ADMINSYSTEM') or is_granted('ROLE_ADMINAGENCE') or object.getId() == user.getId()",
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') or (is_granted('ROLE_ADMINAGENCE') and object.getAgence() == user.getAgence()) or object.getId() == user.getId()",
  *          "path"="agence/user/{id}"
  *      },
  *      "put"={
- *          "security" = "is_granted('ROLE_ADMINSYSTEM') or is_granted('ROLE_ADMINAGENCE') or object.getId() == user.getId()",
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') or (is_granted('ROLE_ADMINAGENCE') and object.getAgence() == user.getAgence()) or object.getId() == user.getId()",
  *          "path"="agence/user/{id}"
  *      },
  *      "delete"={
- *          "security" = "is_granted('ROLE_ADMINSYSTEM') or is_granted('ROLE_ADMINAGENCE')",
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') or (is_granted('ROLE_ADMINAGENCE') and object.getAgence() == user.getAgence())",
  *          "path"="agence/user/{id}"
  *      }
  *  }

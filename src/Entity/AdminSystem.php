@@ -24,10 +24,14 @@ use ApiPlatform\Core\Annotation\ApiResource;
  *  itemOperations={
  *      "get"={
  *          "path"="coldcash/admin/{id}"
+ *      },
+ *      "put"={
+ *          "path"="coldcash/admin/{id}",
+ *          "security" = "user.getId() == object.getId()"
  *      }
  *  }
  * )
  */
-class AdminSystem extends Caissier
+class AdminSystem extends User
 {
 }

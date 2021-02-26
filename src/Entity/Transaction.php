@@ -8,13 +8,20 @@ use Doctrine\ORM\Mapping\InheritanceType;
 use Doctrine\ORM\Mapping\DiscriminatorMap;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=TransactionRepository::class)
  * @InheritanceType("JOINED")
  * @DiscriminatorColumn(name="etat", type="string")
  * @DiscriminatorMap({"tous" = "Transaction", "reussie" = "TransactionTermine", "encours" = "TransactionEnCours"})
- * @ApiResource
+ * @ApiResource(
+ *  collectionOperations={
+ *      "get"={
+ *          "path"="coldcash/transactions"
+ *      }
+ *  }
+ * )
  */
 class Transaction
 {
@@ -23,68 +30,84 @@ class Transaction
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"transaction:depot"})
      */
-    private $montant;
+    protected $montant;
 
     /**
      * @ORM\Column(type="date")
+     * @Groups({"transaction:depot"})
      */
-    private $dateDepot;
+    protected $dateDepot;
 
     /**
      * @ORM\Column(type="date", nullable=true)
      */
-    private $dateRetrait;
+    protected $dateRetrait;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $frais;
+    protected $frais;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $fraisEtat;
+    protected $fraisEtat;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $fraisSystem;
+    protected $fraisSystem;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $fraisDepot;
+    protected $fraisDepot;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $fraisRetrait;
+    protected $fraisRetrait;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"transaction:depot"})
      */
-    private $code;
+    protected $code;
 
     /**
      * @ORM\ManyToOne(targetEntity=Agent::class, inversedBy="depots")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"transaction:depot"})
      */
-    private $agentDepot;
+    protected $agentDepot;
 
     /**
      * @ORM\ManyToOne(targetEntity=Agent::class, inversedBy="retraits")
      */
-    private $agentRetrait;
+    protected $agentRetrait;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $statut;
+    protected $statut;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="envois", cascade="persist")
+     * @ORM\JoinColumn(nullable=false)
+     * @Groups({"transaction:depot"})
+     */
+    protected $envoyeur;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="retraits")
+     */
+    protected $receveur;
 
     public function getId(): ?int
     {
@@ -231,6 +254,30 @@ class Transaction
     public function setStatut(bool $statut): self
     {
         $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function getEnvoyeur(): ?Client
+    {
+        return $this->envoyeur;
+    }
+
+    public function setEnvoyeur(?Client $envoyeur): self
+    {
+        $this->envoyeur = $envoyeur;
+
+        return $this;
+    }
+
+    public function getReceveur(): ?Client
+    {
+        return $this->receveur;
+    }
+
+    public function setReceveur(?Client $receveur): self
+    {
+        $this->receveur = $receveur;
 
         return $this;
     }
