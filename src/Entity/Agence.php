@@ -61,6 +61,7 @@ class Agence
     /**
      * @ORM\Column(type="float")
      * @Groups({"agence:info"})
+     * @Groups({"transaction:retrait"})
      */
     private $solde;
 

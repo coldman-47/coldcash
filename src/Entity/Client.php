@@ -65,12 +65,12 @@ class Client
         return $this->id;
     }
 
-    public function getCni(): ?int
+    public function getCni(): ?string
     {
         return $this->cni;
     }
 
-    public function setCni(?int $cni): self
+    public function setCni(?string $cni): self
     {
         $this->cni = $cni;
 
@@ -101,12 +101,12 @@ class Client
         return $this;
     }
 
-    public function getTelephone(): ?int
+    public function getTelephone(): ?string
     {
         return $this->telephone;
     }
 
-    public function setTelephone(int $telephone): self
+    public function setTelephone(string $telephone): self
     {
         $this->telephone = $telephone;
 

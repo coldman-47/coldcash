@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\TransactionRepository;
 use Doctrine\ORM\Mapping\InheritanceType;
 use Doctrine\ORM\Mapping\DiscriminatorMap;
+use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -20,6 +21,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *      "get"={
  *          "path"="coldcash/transactions"
  *      }
+ *  },
+ *  itemOperations={
+ *      "get"={
+ *          "path"="coldcash/transactions/{code}"
+ *      }
  *  }
  * )
  */
@@ -29,11 +35,12 @@ class Transaction
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @ApiProperty(identifier=false)
      */
     protected $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="float")
      * @Groups({"transaction:depot"})
      */
     protected $montant;
@@ -50,33 +57,34 @@ class Transaction
     protected $dateRetrait;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="float")
      */
     protected $frais;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     protected $fraisEtat;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     protected $fraisSystem;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     protected $fraisDepot;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     protected $fraisRetrait;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"transaction:depot"})
+     * @ApiProperty(identifier=true)
      */
     protected $code;
 
@@ -105,7 +113,9 @@ class Transaction
     protected $envoyeur;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="retraits")
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="retraits", cascade="persist")
+     * @ORM\JoinColumn(nullable=false)
+     * @Groups({"transaction:depot"})
      */
     protected $receveur;
 
@@ -114,12 +124,20 @@ class Transaction
         return $this->id;
     }
 
-    public function getMontant(): ?int
+    public function setId(int $id, $key): self
+    {
+        if (isset($key['item_operation_name']) && $key['item_operation_name'] === 'put') {
+            $this->id = $id;
+        }
+        return $this;
+    }
+
+    public function getMontant(): ?float
     {
         return $this->montant;
     }
 
-    public function setMontant(int $montant): self
+    public function setMontant(float $montant): self
     {
         $this->montant = $montant;
 
@@ -150,60 +168,60 @@ class Transaction
         return $this;
     }
 
-    public function getFrais(): ?int
+    public function getFrais(): ?float
     {
         return $this->frais;
     }
 
-    public function setFrais(int $frais): self
+    public function setFrais(float $frais): self
     {
         $this->frais = $frais;
 
         return $this;
     }
 
-    public function getFraisEtat(): ?int
+    public function getFraisEtat(): ?float
     {
         return $this->fraisEtat;
     }
 
-    public function setFraisEtat(?int $fraisEtat): self
+    public function setFraisEtat(?float $fraisEtat): self
     {
         $this->fraisEtat = $fraisEtat;
 
         return $this;
     }
 
-    public function getFraisSystem(): ?int
+    public function getFraisSystem(): ?float
     {
         return $this->fraisSystem;
     }
 
-    public function setFraisSystem(?int $fraisSystem): self
+    public function setFraisSystem(?float $fraisSystem): self
     {
         $this->fraisSystem = $fraisSystem;
 
         return $this;
     }
 
-    public function getFraisDepot(): ?int
+    public function getFraisDepot(): ?float
     {
         return $this->fraisDepot;
     }
 
-    public function setFraisDepot(?int $fraisDepot): self
+    public function setFraisDepot(?float $fraisDepot): self
     {
         $this->fraisDepot = $fraisDepot;
 
         return $this;
     }
 
-    public function getFraisRetrait(): ?int
+    public function getFraisRetrait(): ?float
     {
         return $this->fraisRetrait;
     }
 
-    public function setFraisRetrait(?int $fraisRetrait): self
+    public function setFraisRetrait(?float $fraisRetrait): self
     {
         $this->fraisRetrait = $fraisRetrait;
 

@@ -47,6 +47,7 @@ class AdminAgence extends User
 {
     /**
      * @ORM\OneToOne(targetEntity=Agence::class, mappedBy="admin", cascade={"persist", "remove"})
+     * @Groups({"transaction:retrait"})
      */
     private $agence;
 

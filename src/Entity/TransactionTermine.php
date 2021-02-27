@@ -8,7 +8,18 @@ use App\Repository\TransactionTermineRepository;
 
 /**
  * @ORM\Entity(repositoryClass=TransactionTermineRepository::class)
- * @ApiResource
+ * @ApiResource(
+ *  collectionOperations={
+ *      "get"={
+ *          "path"="coldcash/transactions/retires"
+ *      }
+ *  },
+ *  itemOperations={
+ *      "get"={
+ *          "path"="coldcash/transaction/retrait/{code}"
+ *      }
+ *  }
+ * )
  */
 class TransactionTermine extends Transaction
 {

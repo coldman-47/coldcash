@@ -38,10 +38,11 @@ class FraisRepository extends ServiceEntityRepository
 
     public function getFrais($value)
     {
-        dd($this->createQueryBuilder('f')
-            ->andWhere('f.minimum >= :val AND f.maximum < :val')
+        return $this->createQueryBuilder('f')
+            ->select('f.tarif')
+            ->where('f.minimum <= :val AND f.maximum > :val')
             ->setParameter('val', $value)
-            ->getQuery()->getResult());
-        return "";
+            ->getQuery()
+            ->getOneOrNullResult()['tarif'];
     }
 }
