@@ -2,12 +2,15 @@
 
 namespace App\Entity;
 
+use App\Entity\Transaction;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping\InheritanceType;
 use Doctrine\ORM\Mapping\DiscriminatorMap;
+use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -65,6 +68,39 @@ class User implements UserInterface
      */
     protected $nom;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    protected $statut;
+
+    /**
+     * @ORM\Column(type="blob", nullable=true)
+     */
+    private $avatar;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Transaction::class, mappedBy="agentDepot")
+     */
+    protected $envois;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Transaction::class, mappedBy="agentRetrait")
+     */
+    protected $retraits;
+
+
+    /**
+     * @ORM\OneToMany(targetEntity=Depot::class, mappedBy="caissier")
+     */
+    protected $depots;
+
+    public function __construct()
+    {
+        $this->depots = new ArrayCollection();
+        $this->retraits = new ArrayCollection();
+        $this->depots = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -94,7 +130,11 @@ class User implements UserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_' . strtoupper($this->profil->getLibelle());
+        if (!$this->getStatut()) {
+            $roles[] = 'ROLE_DENIED';
+        } else {
+            $roles[] = 'ROLE_' . strtoupper($this->profil->getLibelle());
+        }
 
         return array_unique($roles);
     }
@@ -161,6 +201,120 @@ class User implements UserInterface
     public function setNom(string $nom): self
     {
         $this->nom = $nom;
+
+        return $this;
+    }
+
+    public function getStatut(): ?bool
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(?bool $statut): self
+    {
+        $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function getAvatar()
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar($avatar): self
+    {
+        $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Transaction[]
+     */
+    public function getEnvois(): Collection
+    {
+        return $this->envois;
+    }
+
+    public function addEnvoi(Transaction $depot): self
+    {
+        if (!$this->envois->contains($depot)) {
+            $this->envois[] = $depot;
+            $depot->setAgentDepot($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEnvoi(Transaction $depot): self
+    {
+        if ($this->envois->removeElement($depot)) {
+            // set the owning side to null (unless already changed)
+            if ($depot->getAgentDepot() === $this) {
+                $depot->setAgentDepot(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Transaction[]
+     */
+    public function getRetraits(): Collection
+    {
+        return $this->retraits;
+    }
+
+    public function addRetrait(Transaction $retrait): self
+    {
+        if (!$this->retraits->contains($retrait)) {
+            $this->retraits[] = $retrait;
+            $retrait->setAgentRetrait($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRetrait(Transaction $retrait): self
+    {
+        if ($this->retraits->removeElement($retrait)) {
+            // set the owning side to null (unless already changed)
+            if ($retrait->getAgentRetrait() === $this) {
+                $retrait->setAgentRetrait(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Depot[]
+     */
+    public function getDepots(): Collection
+    {
+        return $this->depots;
+    }
+
+    public function addDepot(Depot $depot): self
+    {
+        if (!$this->depots->contains($depot)) {
+            $this->depots[] = $depot;
+            $depot->setCaissier($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDepot(Depot $depot): self
+    {
+        if ($this->depots->removeElement($depot)) {
+            // set the owning side to null (unless already changed)
+            if ($depot->getCaissier() === $this) {
+                $depot->setCaissier(null);
+            }
+        }
 
         return $this;
     }

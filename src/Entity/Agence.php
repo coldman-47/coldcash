@@ -32,6 +32,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *          "security" = "is_granted('ROLE_ADMINSYSTEM') or is_granted('ROLE_CAISSIER')",
  *          "path"="coldcash/agence/{id}",
  *          "denormalization_context"={"groups"={"agence:newInfo"}}
+ *      },
+ *      "delete"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM')",
+ *          "path"="coldcash/agence/{id}",
  *      }
  *  }
  * )
@@ -86,12 +90,24 @@ class Agence
      */
     private $depots;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Transaction::class, mappedBy="agenceDepot")
+     */
+    private $transactionsDepot;
+
+    /**
+     * @ORM\OneToMany(targetEntity=TransactionTermine::class, mappedBy="agenceRetrait")
+     */
+    private $transactionTermines;
+
     public function __construct()
     {
         $this->agents = new ArrayCollection();
         $this->statut = true;
         $this->solde = 700000;
         $this->depots = new ArrayCollection();
+        $this->transactionsDepot = new ArrayCollection();
+        $this->transactionTermines = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -213,6 +229,66 @@ class Agence
             // set the owning side to null (unless already changed)
             if ($depot->getAgence() === $this) {
                 $depot->setAgence(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Transaction[]
+     */
+    public function getTransactionsDepot(): Collection
+    {
+        return $this->transactionsDepot;
+    }
+
+    public function addTransactionsDepot(Transaction $transactionsDepot): self
+    {
+        if (!$this->transactionsDepot->contains($transactionsDepot)) {
+            $this->transactionsDepot[] = $transactionsDepot;
+            $transactionsDepot->setAgenceDepot($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransactionsDepot(Transaction $transactionsDepot): self
+    {
+        if ($this->transactionsDepot->removeElement($transactionsDepot)) {
+            // set the owning side to null (unless already changed)
+            if ($transactionsDepot->getAgenceDepot() === $this) {
+                $transactionsDepot->setAgenceDepot(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|TransactionTermine[]
+     */
+    public function getTransactionTermines(): Collection
+    {
+        return $this->transactionTermines;
+    }
+
+    public function addTransactionTermine(TransactionTermine $transactionTermine): self
+    {
+        if (!$this->transactionTermines->contains($transactionTermine)) {
+            $this->transactionTermines[] = $transactionTermine;
+            $transactionTermine->setAgenceRetrait($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransactionTermine(TransactionTermine $transactionTermine): self
+    {
+        if ($this->transactionTermines->removeElement($transactionTermine)) {
+            // set the owning side to null (unless already changed)
+            if ($transactionTermine->getAgenceRetrait() === $this) {
+                $transactionTermine->setAgenceRetrait(null);
             }
         }
 

@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\AdminSystemRepository;
+use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity(repositoryClass=AdminSystemRepository::class)
@@ -15,7 +17,8 @@ use ApiPlatform\Core\Annotation\ApiResource;
  *  },
  *  collectionOperations={
  *      "post"={
- *          "path"="coldcash/admin"
+ *          "path"="coldcash/admin",
+ *          "deserialize"=false
  *      },
  *      "get"={
  *          "path"="coldcash/admin"
@@ -27,7 +30,8 @@ use ApiPlatform\Core\Annotation\ApiResource;
  *      },
  *      "put"={
  *          "path"="coldcash/admin/{id}",
- *          "security" = "user.getId() == object.getId()"
+ *          "security" = "user.getId() == object.getId()",
+ *          "deserialize"=false
  *      }
  *  }
  * )

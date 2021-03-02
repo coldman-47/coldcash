@@ -23,4 +23,21 @@ use App\Repository\TransactionTermineRepository;
  */
 class TransactionTermine extends Transaction
 {
+    /**
+     * @ORM\ManyToOne(targetEntity=Agence::class, inversedBy="transactionTermines")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private $agenceRetrait;
+
+    public function getAgenceRetrait(): ?Agence
+    {
+        return $this->agenceRetrait;
+    }
+
+    public function setAgenceRetrait(?Agence $agenceRetrait): self
+    {
+        $this->agenceRetrait = $agenceRetrait;
+
+        return $this;
+    }
 }

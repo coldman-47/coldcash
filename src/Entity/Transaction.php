@@ -3,19 +3,21 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Id\IdentityGenerator;
 use App\Repository\TransactionRepository;
 use Doctrine\ORM\Mapping\InheritanceType;
 use Doctrine\ORM\Mapping\DiscriminatorMap;
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=TransactionRepository::class)
  * @InheritanceType("JOINED")
  * @DiscriminatorColumn(name="etat", type="string")
- * @DiscriminatorMap({"tous" = "Transaction", "reussie" = "TransactionTermine", "encours" = "TransactionEnCours"})
+ * @DiscriminatorMap({"tous" = "Transaction","reussie"="TransactionTermine", "encours" = "TransactionEnCours"})
  * @ApiResource(
  *  collectionOperations={
  *      "get"={
@@ -32,9 +34,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class Transaction
 {
     /**
+     * @var int
+     * 
      * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer", name="id", nullable=false)
      * @ApiProperty(identifier=false)
      */
     protected $id;
@@ -46,13 +50,13 @@ class Transaction
     protected $montant;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="datetime")
      * @Groups({"transaction:depot"})
      */
     protected $dateDepot;
 
     /**
-     * @ORM\Column(type="date", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     protected $dateRetrait;
 
@@ -89,14 +93,14 @@ class Transaction
     protected $code;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Agent::class, inversedBy="depots")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="envois")
      * @ORM\JoinColumn(nullable=false)
      * @Groups({"transaction:depot"})
      */
     protected $agentDepot;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Agent::class, inversedBy="retraits")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="retraits")
      */
     protected $agentRetrait;
 
@@ -119,17 +123,17 @@ class Transaction
      */
     protected $receveur;
 
+    private $deny = "Accès refusé!";
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Agence::class, inversedBy="transactionsDepot")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private $agenceDepot;
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function setId(int $id, $key): self
-    {
-        if (isset($key['item_operation_name']) && $key['item_operation_name'] === 'put') {
-            $this->id = $id;
-        }
-        return $this;
     }
 
     public function getMontant(): ?float
@@ -240,28 +244,40 @@ class Transaction
         return $this;
     }
 
-    public function getAgentDepot(): ?Agent
+    public function getAgentDepot()
     {
-        return $this->agentDepot;
+        $operateur = $this->agentDepot;
+        if ($operateur && !($operateur instanceof Agent || $operateur instanceof AdminAgence)) {
+            throw new BadRequestHttpException($this->deny);
+        }
+        return $operateur;
     }
 
-    public function setAgentDepot(?Agent $agentDepot): self
+    public function setAgentDepot($agentDepot): self
     {
-        $this->agentDepot = $agentDepot;
-
-        return $this;
+        if ($agentDepot instanceof Agent || $agentDepot instanceof AdminAgence) {
+            $this->agentDepot = $agentDepot;
+            return $this;
+        }
+        throw new BadRequestHttpException($this->deny);
     }
 
-    public function getAgentRetrait(): ?Agent
+    public function getAgentRetrait()
     {
-        return $this->agentRetrait;
+        $operateur = $this->agentRetrait;
+        if ($operateur && !($operateur instanceof Agent || $operateur instanceof AdminAgence)) {
+            throw new BadRequestHttpException($this->deny);
+        }
+        return $operateur;
     }
 
-    public function setAgentRetrait(?Agent $agentRetrait): self
+    public function setAgentRetrait($agentRetrait): self
     {
-        $this->agentRetrait = $agentRetrait;
-
-        return $this;
+        if ($agentRetrait instanceof Agent || $agentRetrait instanceof AdminAgence) {
+            $this->agentRetrait = $agentRetrait;
+            return $this;
+        }
+        throw new BadRequestHttpException($this->deny);
     }
 
     public function getStatut(): ?bool
@@ -296,6 +312,18 @@ class Transaction
     public function setReceveur(?Client $receveur): self
     {
         $this->receveur = $receveur;
+
+        return $this;
+    }
+
+    public function getAgenceDepot(): ?Agence
+    {
+        return $this->agenceDepot;
+    }
+
+    public function setAgenceDepot(?Agence $agenceDepot): self
+    {
+        $this->agenceDepot = $agenceDepot;
 
         return $this;
     }

@@ -13,18 +13,25 @@ use ApiPlatform\Core\Annotation\ApiResource;
  * @ApiResource(
  *  attributes = {
  *      "pagination_items_per_page"=10,  
- *      "security" = "is_granted('ROLE_ADMINSYSTEM')"
  *  },
  *  collectionOperations={
  *      "get"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM')",
  *          "path"="coldcash/caissiers"
  *      },
  *      "post"={
- *          "path"="coldcash/caissiers"
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM')",
+ *          "path"="coldcash/caissier",
+ *          "deserialize"=false
  *      }
  *  },
  *  itemOperations={
  *      "get"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') || user.getId() == object.getId()",
+ *          "path"="coldcash/caissier/{id}"
+ *      },
+ *      "delete"={
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') || user.getId() == object.getId()",
  *          "path"="coldcash/caissier/{id}"
  *      }
  *  }
@@ -35,7 +42,7 @@ class Caissier extends User
     /**
      * @ORM\OneToMany(targetEntity=Depot::class, mappedBy="caissier")
      */
-    private $depots;
+    protected $depots;
 
     public function __construct()
     {

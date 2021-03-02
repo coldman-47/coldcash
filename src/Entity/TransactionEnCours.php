@@ -30,6 +30,9 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
  *      "put"={
  *          "path"="coldcash/transaction/retrait/{code}",
  *          "normalization_context"={"groups"={"transaction:retrait"}}
+ *      },
+ *      "delete"={
+ *          "path"="coldcash/transaction/cancel/{code}",
  *      }
  *  }
  * )

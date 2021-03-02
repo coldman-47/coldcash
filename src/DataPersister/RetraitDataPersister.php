@@ -3,7 +3,6 @@
 namespace App\DataPersister;
 
 use DateTime;
-use Normalizer;
 use App\Entity\TransactionEnCours;
 use App\Entity\TransactionTermine;
 use Doctrine\ORM\EntityManagerInterface;
@@ -11,6 +10,7 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 final class RetraitDataPersister implements ContextAwareDataPersisterInterface
 {
@@ -28,21 +28,36 @@ final class RetraitDataPersister implements ContextAwareDataPersisterInterface
 
     public function persist($data, array $context = [])
     {
+        $em = $this->manager;
+        $receveur = $em->getUnitOfWork()->getOriginalEntityData($data)['receveur']->setCni($data->getReceveur()->getCni());
+        $data->setReceveur($receveur);
         $montant = $data->getMontant();
-        $data->setAgentRetrait($this->security->getUser());
-        $data->getAgentDepot()->getAgence()->setSolde(-$montant - $data->getFrais() + $data->getFraisDepot());
-        $data->getAgentRetrait()->getAgence()->setSolde($montant + $data->getFraisRetrait());
-        $data->setDateRetrait(new DateTime());
-        $retrait = $this->normalizer->denormalize($this->normalizer->normalize($data), TransactionTermine::class);
-        $retrait->setId($data->getId(), $context);
-        $this->manager->remove($data);
-        $this->manager->persist($retrait);
-        $this->manager->flush();
-        return new JsonResponse("success", 200);
+        $agentRetrait = $this->security->getUser();
+        $data->setAgentRetrait($agentRetrait)
+            ->setAgenceRetrait($agentRetrait->getAgence())
+            ->setDateRetrait(new DateTime());
+        $agentRetrait->getAgence()->setSolde($montant + $data->getFraisRetrait());
+        $response = $this->normalizer->normalize($data);
+        $retrait = $this->normalizer->denormalize($response, TransactionTermine::class);
+        $em->remove($data);
+        $em->persist($retrait);
+        $em->flush($retrait);
+        return new JsonResponse($response, 200);
     }
 
     public function remove($data, array $context = [])
     {
-        // call your persistence layer to delete $data
+        $data->getAgentDepot()->getAgence()->setSolde($data->getMontant() + $data->getFrais() - $data->fraisDepot());
+        $this->manager->remove($data);
+        $this->manager->flush();
+        return new JsonResponse("Transaction annulée", 200);
     }
 }
+
+// $uow = $this->manager->getUnitOfWork();
+// $uow->registerManaged($retrait, ["id" => $retrait->getId()], $this->normalizer->normalize($data));
+// $uow->scheduleForUpdate($retrait);
+// dd($uow);
+// $metadata = $this->manager->getClassMetaData(TransactionTermine::class);
+// $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
+// $metadata->setIdGenerator(new AssignedGenerator());

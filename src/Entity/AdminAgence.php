@@ -3,12 +3,11 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\ProfilRepository;
 use App\Repository\AdminAgenceRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=AdminAgenceRepository::class)
@@ -20,11 +19,6 @@ use Symfony\Component\Validator\Constraints\NotNull;
  *      "get"={
  *          "security" = "is_granted('ROLE_ADMINSYSTEM')",
  *          "path"="agence/admins"
- *      },
- *      "post"={
- *          "security" = "is_granted('ROLE_ADMINSYSTEM')",
- *          "path"="agence/admins",
- *          "denormalization_context"={"groups"={"adminAgence"}}
  *      }
  *  },
  *  itemOperations={
@@ -34,7 +28,8 @@ use Symfony\Component\Validator\Constraints\NotNull;
  *      },
  *      "put"={
  *          "security" = "is_granted('ROLE_ADMINSYSTEM') or user.getId() == object.getId()",
- *          "path"="agence/admin/{id}"
+ *          "path"="agence/admin/{id}",
+ *          "deserialize"=false
  *      },
  *      "delete"={
  *          "security" = "is_granted('ROLE_ADMINSYSTEM')",
@@ -50,11 +45,6 @@ class AdminAgence extends User
      * @Groups({"transaction:retrait"})
      */
     private $agence;
-
-    public function __construct()
-    {
-        $this->roles[] = 'ROLE_AGENT';
-    }
 
     public function getAgence(): ?Agence
     {

@@ -34,6 +34,7 @@ class AppFixtures extends Fixture
                     $user->setProfil($profil)
                         ->setUsername(strtolower($libelle) . ($i + 1))
                         ->setNom($faker->name)
+                        ->setStatut(true)
                         ->setPassword($this->encoder->encodePassword($user, 'coldpass'));
                     if (in_array($libelle, ['adminAgence', 'agent'])) {
                         if ($libelle !== 'agent') {
