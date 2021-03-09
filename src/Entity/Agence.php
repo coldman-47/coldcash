@@ -29,7 +29,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *          "normalization_context"={"groups"={"agence:info"}}
  *      },
  *      "put"={
- *          "security" = "is_granted('ROLE_ADMINSYSTEM') or is_granted('ROLE_CAISSIER')",
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') or (is_granted('ROLE_ADMINAGENCE') and user.getAgence() == object)",
  *          "path"="coldcash/agence/{id}",
  *          "denormalization_context"={"groups"={"agence:newInfo"}}
  *      },

@@ -53,7 +53,7 @@ final class EnvoisDataPersister implements ContextAwareDataPersisterInterface
             ->setDateDepot(new DateTime())
             ->setCode($rand)
             ->setStatut(true);
-        $data->getAgentDepot()->getAgence()->setSolde(-$montant - $data->getFrais() + $data->getFraisDepot());
+        $data->getAgenceDepot()->setSolde(-$montant - $data->getFrais() + $data->getFraisDepot());
         $this->manager->persist($data);
         $this->manager->flush();
         return new JsonResponse($this->normalizer->normalize($data), 200);

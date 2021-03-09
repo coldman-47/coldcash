@@ -23,22 +23,22 @@ final class RetraitDataPersister implements ContextAwareDataPersisterInterface
 
     public function supports($data, array $context = []): bool
     {
-        return $data instanceof TransactionEnCours;
+        return $data instanceof TransactionEnCours && isset($context['item_operation_name']);
     }
 
     public function persist($data, array $context = [])
     {
         $em = $this->manager;
         $receveur = $em->getUnitOfWork()->getOriginalEntityData($data)['receveur']->setCni($data->getReceveur()->getCni());
-        $data->setReceveur($receveur);
         $montant = $data->getMontant();
         $agentRetrait = $this->security->getUser();
-        $data->setAgentRetrait($agentRetrait)
-            ->setAgenceRetrait($agentRetrait->getAgence())
+        $data->setReceveur($receveur)
+            ->setAgentRetrait($agentRetrait)
             ->setDateRetrait(new DateTime());
         $agentRetrait->getAgence()->setSolde($montant + $data->getFraisRetrait());
         $response = $this->normalizer->normalize($data);
         $retrait = $this->normalizer->denormalize($response, TransactionTermine::class);
+        $retrait->setAgenceRetrait($agentRetrait->getAgence());
         $em->remove($data);
         $em->persist($retrait);
         $em->flush($retrait);

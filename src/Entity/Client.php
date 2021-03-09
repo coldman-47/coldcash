@@ -28,19 +28,19 @@ class Client
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"transaction:depot", "transaction:retrait"})
+     * @Groups({"transaction:depot"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"transaction:depot", "transaction:retrait"})
+     * @Groups({"transaction:depot"})
      */
     private $prenom;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"transaction:depot", "transaction:retrait"})
+     * @Groups({"transaction:depot"})
      */
     private $telephone;
 

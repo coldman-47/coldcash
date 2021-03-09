@@ -3,14 +3,11 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\TransactionEnCoursRepository;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 
 /**
  * @ORM\Entity(repositoryClass=TransactionEnCoursRepository::class)
- * @ApiFilter(SearchFilter::class, properties={"code": "exact"})
  * @ApiResource(
  *  collectionOperations={
  *      "post"={
@@ -29,7 +26,8 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
  *      },
  *      "put"={
  *          "path"="coldcash/transaction/retrait/{code}",
- *          "normalization_context"={"groups"={"transaction:retrait"}}
+ *          "normalization_context"={"groups"={"transaction:depot"}},
+ *          "denormalization_context"={"groups"={"transaction:retrait"}}
  *      },
  *      "delete"={
  *          "path"="coldcash/transaction/cancel/{code}",

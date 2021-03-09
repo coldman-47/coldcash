@@ -6,14 +6,17 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Id\IdentityGenerator;
 use App\Repository\TransactionRepository;
 use Doctrine\ORM\Mapping\InheritanceType;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\ORM\Mapping\DiscriminatorMap;
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
+ * @ApiFilter(DateFilter::class, properties={"deteDepot": "exact", "dateRetrait": "exact"})
  * @ORM\Entity(repositoryClass=TransactionRepository::class)
  * @InheritanceType("JOINED")
  * @DiscriminatorColumn(name="etat", type="string")
@@ -51,7 +54,6 @@ class Transaction
 
     /**
      * @ORM\Column(type="datetime")
-     * @Groups({"transaction:depot"})
      */
     protected $dateDepot;
 
@@ -87,7 +89,6 @@ class Transaction
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"transaction:depot"})
      * @ApiProperty(identifier=true)
      */
     protected $code;
@@ -95,7 +96,6 @@ class Transaction
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="envois")
      * @ORM\JoinColumn(nullable=false)
-     * @Groups({"transaction:depot"})
      */
     protected $agentDepot;
 
@@ -119,7 +119,7 @@ class Transaction
     /**
      * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="retraits", cascade="persist")
      * @ORM\JoinColumn(nullable=false)
-     * @Groups({"transaction:depot"})
+     * @Groups({"transaction:depot", "transaction:retrait"})
      */
     protected $receveur;
 
