@@ -21,13 +21,20 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @DiscriminatorMap({"admin" = "AdminSystem", "caissier" = "Caissier", "adminAgence" = "AdminAgence", "agent"="Agent", "user" = "User"})
  * @ApiResource(
  * attributes = {
- *      "pagination_items_per_page"=10,  
- *      "security" = "is_granted('ROLE_ADMINSYSTEM')"
+ *      "pagination_items_per_page"=10  
  *  },
  *  collectionOperations={
- *      "get"={"path"="coldcash/users"}
+ *      "get"={
+ *          "path"="coldcash/admin/users",
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM')"
+ *      }
  *  },
- *  itemOperations={}
+ *  itemOperations={
+ *      "get"={
+ *          "path"="coldcash/user/{id}",
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') or user.getId() == object.getId()"
+ *      }
+ *  }
  * )
  */
 class User implements UserInterface
@@ -219,7 +226,8 @@ class User implements UserInterface
 
     public function getAvatar()
     {
-        return $this->avatar;
+        $photo = $this->avatar;
+        return is_resource($photo) ? base64_encode(stream_get_contents($photo)) : $photo;
     }
 
     public function setAvatar($avatar): self
