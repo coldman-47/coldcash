@@ -4,11 +4,16 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\FraisRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
 
 /**
  * @ORM\Entity(repositoryClass=FraisRepository::class)
- * @ApiResource
+ * @ApiResource(
+ *  routePrefix = "/coldcash"
+ * )
+ * @ApiFilter(RangeFilter::class, properties={"minimum", "maximum"})
  */
 class Frais
 {

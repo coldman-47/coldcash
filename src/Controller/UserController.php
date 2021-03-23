@@ -72,7 +72,7 @@ class UserController extends AbstractController
 
     /**
      * @Route(
-     *  "/api/agence/user",
+     *  "/api/coldcash/agent",
      *  name="addAgent",
      *  methods = {"POST"},
      *  defaults={

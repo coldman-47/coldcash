@@ -21,7 +21,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @DiscriminatorMap({"admin" = "AdminSystem", "caissier" = "Caissier", "adminAgence" = "AdminAgence", "agent"="Agent", "user" = "User"})
  * @ApiResource(
  * attributes = {
- *      "pagination_items_per_page"=10  
+ *      "pagination_items_per_page"=10,
+ *      "enable_max_depth"=true
  *  },
  *  collectionOperations={
  *      "get"={
@@ -32,7 +33,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *  itemOperations={
  *      "get"={
  *          "path"="coldcash/user/{id}",
- *          "security" = "is_granted('ROLE_ADMINSYSTEM') or user.getId() == object.getId()"
+ *          "security" = "is_granted('ROLE_ADMINSYSTEM') or user.getId() == object.getId()",
+ *          "normalization_context" = {"groups"={"user"}}
  *      }
  *  }
  * )
@@ -43,13 +45,13 @@ class User implements UserInterface
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups("adminAgence")
+     * @Groups("adminAgence", "user", "admin-agence")
      */
     protected $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups("adminAgence")
+     * @Groups("adminAgence", "user", "admin-agence","agence:add")
      */
     protected $username;
 
@@ -58,46 +60,51 @@ class User implements UserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
-     * @Groups("adminAgence")
+     * @Groups("adminAgence", "user", "admin-agence", "agence:add")
      */
     protected $password;
 
     /**
      * @ORM\ManyToOne(targetEntity=Profil::class, inversedBy="users")
      * @ORM\JoinColumn(nullable=false)
-     * @Groups("adminAgence")
+     * @Groups("adminAgence", "user", "admin-agence")
      */
     protected $profil;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("adminAgence")
+     * @Groups("adminAgence", "user", "admin-agence", "agence:add")
      */
     protected $nom;
 
     /**
      * @ORM\Column(type="boolean", nullable=true)
+     * @Groups("user", "admin-agence")
      */
     protected $statut;
 
     /**
      * @ORM\Column(type="blob", nullable=true)
+     * @Groups("user", "admin-agence")
      */
     private $avatar;
 
     /**
      * @ORM\OneToMany(targetEntity=Transaction::class, mappedBy="agentDepot")
+     * @Groups("user", "admin-agence")
      */
     protected $envois;
 
     /**
      * @ORM\OneToMany(targetEntity=Transaction::class, mappedBy="agentRetrait")
+     * @Groups("user", "admin-agence")
      */
     protected $retraits;
 
 
     /**
      * @ORM\OneToMany(targetEntity=Depot::class, mappedBy="caissier")
+     * @Groups("user", "admin-agence")
      */
     protected $depots;
 

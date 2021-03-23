@@ -7,6 +7,7 @@ use App\Repository\ProfilRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=ProfilRepository::class)
@@ -23,6 +24,7 @@ class Profil
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("user")
      */
     private $libelle;
 

@@ -16,12 +16,13 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * @ApiFilter(DateFilter::class, properties={"deteDepot": "exact", "dateRetrait": "exact"})
+ * @ApiFilter(DateFilter::class, properties={"dateDepot": "exact", "dateRetrait": "exact"})
  * @ORM\Entity(repositoryClass=TransactionRepository::class)
  * @InheritanceType("JOINED")
  * @DiscriminatorColumn(name="etat", type="string")
  * @DiscriminatorMap({"tous" = "Transaction","reussie"="TransactionTermine", "encours" = "TransactionEnCours"})
  * @ApiResource(
+ *  mercure=true,
  *  collectionOperations={
  *      "get"={
  *          "path"="coldcash/transactions"
@@ -29,7 +30,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  *  },
  *  itemOperations={
  *      "get"={
- *          "path"="coldcash/transactions/{code}"
+ *          "path"="coldcash/transaction/{code}"
  *      }
  *  }
  * )
@@ -48,17 +49,19 @@ class Transaction
 
     /**
      * @ORM\Column(type="float")
-     * @Groups({"transaction:depot"})
+     * @Groups({"transaction:depot", "user"})
      */
     protected $montant;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups("user")
      */
     protected $dateDepot;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
+     * @Groups("user")
      */
     protected $dateRetrait;
 
@@ -79,11 +82,13 @@ class Transaction
 
     /**
      * @ORM\Column(type="float", nullable=true)
+     * @Groups("user")
      */
     protected $fraisDepot;
 
     /**
      * @ORM\Column(type="float", nullable=true)
+     * @Groups("user")
      */
     protected $fraisRetrait;
 
@@ -96,11 +101,13 @@ class Transaction
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="envois")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"user"})
      */
     protected $agentDepot;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="retraits")
+     * @Groups({"user"})
      */
     protected $agentRetrait;
 

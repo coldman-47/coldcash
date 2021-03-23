@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\DepotRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
-use DateTime;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
@@ -43,23 +44,27 @@ class Depot
 
     /**
      * @ORM\Column(type="float")
+     * @Groups({"user"})
      */
     private $montant;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="depots")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"user"})
      */
     private $caissier;
 
     /**
      * @ORM\ManyToOne(targetEntity=Agence::class, inversedBy="depots")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"user"})
      */
     private $agence;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"user"})
      */
     private $date;
 

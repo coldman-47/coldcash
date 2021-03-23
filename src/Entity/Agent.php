@@ -22,7 +22,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *      },
  *      "post"={
  *          "security" = "is_granted('ROLE_ADMINAGENCE')",
- *          "path"="agence/user",
+ *          "path"="coldcash/agent",
  *          "deserialize"=false
  *      }
  *  },
@@ -48,7 +48,7 @@ class Agent extends User
     /**
      * @ORM\ManyToOne(targetEntity=Agence::class, inversedBy="agents", cascade="persist")
      * @ORM\JoinColumn(nullable=false)
-     * @Groups({"transaction:retrait"})
+     * @Groups({"transaction:retrait", "user"})
      */
     private $agence;
 

@@ -7,7 +7,10 @@ use App\Entity\TransactionEnCours;
 use App\Repository\FraisRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Hhxsv5\SSE\Event;
+use Hhxsv5\SSE\SSE;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -35,11 +38,11 @@ final class EnvoisDataPersister implements ContextAwareDataPersisterInterface
         if ($montant <= 0) {
             throw new BadRequestHttpException("Montant incorrect!");
         }
+        $frais = $this->repo->getFrais($montant);
         $agentDepot = $this->security->getUser();
-        if ($montant < 5000 || $montant > $agentDepot->getAgence()->getSolde()) {
+        if ($agentDepot->getAgence()->getSolde() < 5000 || $montant + $frais > $agentDepot->getAgence()->getSolde()) {
             throw new BadRequestHttpException("Solde du compte de l'agence insuffisant!");
         }
-        $frais = $this->repo->getFrais($montant);
         if ($frais < 1) {
             $frais *= $montant;
         }

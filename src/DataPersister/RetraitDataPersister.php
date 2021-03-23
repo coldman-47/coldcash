@@ -35,13 +35,13 @@ final class RetraitDataPersister implements ContextAwareDataPersisterInterface
         $data->setReceveur($receveur)
             ->setAgentRetrait($agentRetrait)
             ->setDateRetrait(new DateTime());
-        $agentRetrait->getAgence()->setSolde($montant + $data->getFraisRetrait());
         $response = $this->normalizer->normalize($data);
         $retrait = $this->normalizer->denormalize($response, TransactionTermine::class);
+        $agentRetrait->getAgence()->setSolde($montant + $retrait->getFraisRetrait());
         $retrait->setAgenceRetrait($agentRetrait->getAgence());
         $em->remove($data);
         $em->persist($retrait);
-        $em->flush($retrait);
+        $em->flush();
         return new JsonResponse($response, 200);
     }
 

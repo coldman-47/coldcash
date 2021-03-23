@@ -35,8 +35,9 @@ class UserServices
         $userNamspace = "App\\Entity\\$profil";
         if (class_exists($userNamspace)) {
             $newUser = $this->serializer->denormalize($userTab, $userNamspace);
-            $newUser->setProfil($this->repo->findOneBy(['libelle' => $profil]));
-            $newUser->setPassword($this->encoder->encodePassword($newUser, $userTab['password']));
+            $newUser->setProfil($this->repo->findOneBy(['libelle' => $profil]))
+                ->setPassword($this->encoder->encodePassword($newUser, $userTab['password']))
+                ->setStatut(true);
             return $newUser;
         } else {
             throw new BadRequestException("Le profil renseigné n'éxiste pas");

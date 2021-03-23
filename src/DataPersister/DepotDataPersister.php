@@ -30,7 +30,8 @@ final class DepotDataPersister implements ContextAwareDataPersisterInterface
     {
         $montant = $data->getMontant();
         $data->getAgence()->setSolde($montant);
-        $data->setCaissier($this->security->getUser());
+        $data->setCaissier($this->security->getUser())
+            ->setStatut(true);
         $this->manager->persist($data);
         $this->manager->flush();
         return new JsonResponse("success", 200);

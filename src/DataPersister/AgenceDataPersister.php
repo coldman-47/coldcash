@@ -5,13 +5,15 @@ namespace App\DataPersister;
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\Core\DataPersister\ContextAwareDataPersisterInterface;
 use App\Entity\Agence;
+use App\Repository\ProfilRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class AgenceDataPersister implements ContextAwareDataPersisterInterface
 {
-    public function __construct(EntityManagerInterface $manager)
+    public function __construct(EntityManagerInterface $manager, ProfilRepository $repo)
     {
         $this->manager = $manager;
+        $this->repo = $repo;
     }
 
     public function supports($data, array $context = []): bool
@@ -21,6 +23,9 @@ final class AgenceDataPersister implements ContextAwareDataPersisterInterface
 
     public function persist($data, array $context = [])
     {
+        $data->getAdmin()->setProfil($this->repo->findOneBy(['libelle' => 'adminAgence']));
+        $this->manager->persist($data);
+        $this->manager->flush();
         return $data;
     }
 

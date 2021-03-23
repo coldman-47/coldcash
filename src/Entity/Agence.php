@@ -19,7 +19,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *      },
  *      "post"={
  *          "security" = "is_granted('ROLE_ADMINSYSTEM')",
- *          "path"="coldcash/agences"
+ *          "path"="coldcash/agence",
+ *          "denormalization_context"={"groups"={"agence:add"}}
  *      }
  *  },
  *  itemOperations={
@@ -46,26 +47,26 @@ class Agence
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"agence:info"})
+     * @Groups({"agence:info", "user"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"agence:info", "agence:newInfo"})
+     * @Groups({"agence:add","agence:info", "agence:newInfo", "user"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="text")
-     * @Groups({"agence:info", "agence:newInfo"})
+     * @Groups({"agence:add","agence:info", "agence:newInfo", "user"})
      */
     private $adresse;
 
     /**
      * @ORM\Column(type="float")
      * @Groups({"agence:info"})
-     * @Groups({"transaction:retrait"})
+     * @Groups({"transaction:retrait", "user"})
      */
     private $solde;
 
@@ -82,6 +83,7 @@ class Agence
 
     /**
      * @ORM\OneToOne(targetEntity=AdminAgence::class, inversedBy="agence", cascade={"persist", "remove"})
+     * @Groups({"agence:add"})
      */
     private $admin;
 
@@ -92,10 +94,12 @@ class Agence
 
     /**
      * @ORM\OneToMany(targetEntity=Transaction::class, mappedBy="agenceDepot")
+     * @Groups({"agence:info", "user"})
      */
     private $transactionsDepot;
 
     /**
+     * @Groups({"agence:info", "user"})
      * @ORM\OneToMany(targetEntity=TransactionTermine::class, mappedBy="agenceRetrait")
      */
     private $transactionTermines;
